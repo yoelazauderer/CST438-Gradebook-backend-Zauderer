@@ -39,7 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
  * 
  * the http response and repository is verified.
  * 
- *   Note: This tests uses Junit 5.
+ *  Note: This tests uses Junit 5.
  *  ContextConfiguration identifies the controller class to be tested
  *  addFilters=false turns off security.  (I could not get security to work in test environment.)
  *  WebMvcTest is needed for test environment to create Repository classes.
@@ -240,6 +240,9 @@ public class JunitTestGradebook {
 		updatedag.setScore("88");
 		verify(assignmentGradeRepository, times(1)).save(updatedag);
 	}
+	
+	@Test
+	
 
 	private static String asJsonString(final Object obj) {
 		try {
