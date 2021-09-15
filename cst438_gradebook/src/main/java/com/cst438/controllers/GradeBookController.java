@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -102,6 +104,23 @@ public class GradeBookController {
 
         return assignmentDTO;
     }
+	
+	@RequestMapping(path="/gradebook/{assignmentId}", method = RequestMethod.DELETE)
+	@Transactional
+	public void dropAssignment( @PathVariable int assignmentId) {
+		
+		String email = "dwisneski@csumb.edu";
+		Assignment a = checkAssignment(assignmentId, email);
+		
+		Assignment assignment = assignmentRepository.findById(assignmentId);
+		
+		//verify there are no grades
+		if (assignment.getNeedsGrading() == 1) {
+			assignmentRepository.delete(assignment);
+		} else {
+			throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "Can't Delete - Assignment has grades");
+		}
+	}
 	
 	@GetMapping("/gradebook/{id}")
 	public GradebookDTO getGradebook(@PathVariable("id") Integer assignmentId  ) {
