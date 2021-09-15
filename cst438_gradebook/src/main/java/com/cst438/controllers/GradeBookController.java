@@ -1,7 +1,11 @@
 package com.cst438.controllers;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.cst438.domain.Assignment;
 import com.cst438.domain.AssignmentListDTO;
+import com.cst438.domain.AssignmentListDTO.AssignmentDTO;
 import com.cst438.domain.AssignmentGrade;
 import com.cst438.domain.AssignmentGradeRepository;
 import com.cst438.domain.AssignmentRepository;
@@ -56,6 +61,47 @@ public class GradeBookController {
 		}
 		return result;
 	}
+	
+	// As an instructor for a course , I can add a new assignment for my course.  
+	// The assignment has a name and a due date.
+	@PostMapping("/gradebook/add")
+	@Transactional
+	public AssignmentDTO addAssignment(@RequestBody AssignmentDTO assignmentDTO) {
+		Assignment duplicateAssignment = assignmentRepository.findById(assignmentDTO.assignmentId);
+		
+		if(duplicateAssignment == null) {
+			Assignment assignment = new Assignment();
+			assignment.setName(assignmentDTO.assignmentName);
+			
+			SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+			Date dueDate = null;
+			try {
+				dueDate = (Date) formatter.parse(assignmentDTO.dueDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			assignment.setDueDate(dueDate);
+			
+			Course course = courseRepository.findByCourse_id(assignmentDTO.courseId);
+			assignment.setCourse(course);
+			
+			//assignment.setNeedsGrading(1);
+			Assignment newAssignment = assignmentRepository.save(assignment);
+			
+			return createAssignmentDTO(newAssignment);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assignment already exists.");
+		}
+		
+	}
+	
+	private AssignmentDTO createAssignmentDTO(Assignment a) {
+        AssignmentDTO assignmentDTO = new AssignmentDTO(a.getId(), assignmentRepository.findById(a.getId()).getId(), a.getName(),
+        		a.getName(), a.getDueDate().toString());
+
+        return assignmentDTO;
+    }
 	
 	@GetMapping("/gradebook/{id}")
 	public GradebookDTO getGradebook(@PathVariable("id") Integer assignmentId  ) {
@@ -151,6 +197,37 @@ public class GradeBookController {
 		}
 		
 	}
+	
+	// As an instructor, I can change the name of the assignment for my course.
+	@PutMapping("/gradebook/edit-name/{id}")
+	public void editAssignmentName (@RequestBody AssignmentDTO assignments, @PathVariable("id") Integer assignmentId ) {
+		
+		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+		checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
+		
+			Assignment a = assignmentRepository.findById(assignments.assignmentId);
+			if (a == null) {
+				throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Invalid assignment");
+			}
+			a.setName(assignments.assignmentName.toString());
+			assignmentRepository.save(a);
+		
+	}
+	
+//	@PostMapping("gradebook/change-name")
+//	@Transactional
+//	public AssignmentDTO editAssignmentName(@RequestBody AssignmentDTO assignmentDTO) {
+//		Assignment assignment = assignmentRepository.findById(assignmentDTO.assignmentId);
+//
+//        if (assignment != null) {
+//            assignment.setName(assignment);
+//            studentRepository.save(student);
+//
+//            return createAssignmentDTO(student);
+//        } else {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Assignment");
+//        }
+//	}
 	
 	private Assignment checkAssignment(int assignmentId, String email) {
 		// get assignment 
