@@ -64,64 +64,6 @@ public class GradeBookController {
 		return result;
 	}
 	
-	// As an instructor for a course , I can add a new assignment for my course.  
-	// The assignment has a name and a due date.
-	@PostMapping("/gradebook/add")
-	@Transactional
-	public AssignmentDTO addAssignment(@RequestBody AssignmentDTO assignmentDTO) {
-		Assignment duplicateAssignment = assignmentRepository.findById(assignmentDTO.assignmentId);
-		
-		if(duplicateAssignment == null) {
-			Assignment assignment = new Assignment();
-			assignment.setName(assignmentDTO.assignmentName);
-			
-			SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-			Date dueDate = null;
-			try {
-				dueDate = (Date) formatter.parse(assignmentDTO.dueDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-			assignment.setDueDate(dueDate);
-			
-			Course course = courseRepository.findByCourse_id(assignmentDTO.courseId);
-			assignment.setCourse(course);
-			
-			//assignment.setNeedsGrading(1);
-			Assignment newAssignment = assignmentRepository.save(assignment);
-			
-			return createAssignmentDTO(newAssignment);
-		} else {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assignment already exists.");
-		}
-		
-	}
-	
-	private AssignmentDTO createAssignmentDTO(Assignment a) {
-        AssignmentDTO assignmentDTO = new AssignmentDTO(a.getId(), assignmentRepository.findById(a.getId()).getId(), a.getName(),
-        		a.getName(), a.getDueDate().toString());
-
-        return assignmentDTO;
-    }
-	
-	@RequestMapping(path="/gradebook/{assignmentId}", method = RequestMethod.DELETE)
-	@Transactional
-	public void dropAssignment( @PathVariable int assignmentId) {
-		
-		String email = "dwisneski@csumb.edu";
-		Assignment a = checkAssignment(assignmentId, email);
-		
-		Assignment assignment = assignmentRepository.findById(assignmentId);
-		
-		//verify there are no grades
-		if (assignment.getNeedsGrading() == 1) {
-			assignmentRepository.delete(assignment);
-		} else {
-			throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "Can't Delete - Assignment has grades");
-		}
-	}
-	
 	@GetMapping("/gradebook/{id}")
 	public GradebookDTO getGradebook(@PathVariable("id") Integer assignmentId  ) {
 		
@@ -217,36 +159,95 @@ public class GradeBookController {
 		
 	}
 	
-	// As an instructor, I can change the name of the assignment for my course.
-	@PutMapping("/gradebook/edit-name/{id}")
-	public void editAssignmentName (@RequestBody AssignmentDTO assignments, @PathVariable("id") Integer assignmentId ) {
-		
-		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
-		checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
-		
-			Assignment a = assignmentRepository.findById(assignments.assignmentId);
-			if (a == null) {
-				throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Invalid assignment");
-			}
-			a.setName(assignments.assignmentName.toString());
-			assignmentRepository.save(a);
-		
+	// As an instructor for a course , I can add a new assignment for my course.  
+	// The assignment has a name and a due date.
+	@PostMapping("/gradebook/add")
+	@Transactional
+	public AssignmentDTO addAssignment(@RequestBody AssignmentDTO assignmentDTO) {
+		Assignment duplicateAssignment = assignmentRepository.findById(assignmentDTO.assignmentId);
+			
+		if(duplicateAssignment == null) {
+			Assignment assignment = new Assignment();
+			assignment.setName(assignmentDTO.assignmentName);
+				
+			SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+			Date dueDate = null;
+			try {
+				dueDate = (Date) formatter.parse(assignmentDTO.dueDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			assignment.setDueDate(dueDate);
+				
+			Course course = courseRepository.findByCourse_id(assignmentDTO.courseId);
+			assignment.setCourse(course);
+				
+			//assignment.setNeedsGrading(1);
+			Assignment newAssignment = assignmentRepository.save(assignment);
+				
+			return createAssignmentDTO(newAssignment);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assignment already exists.");
+		}
+			
 	}
 	
+		
+	//As an instructor, I can change the name of the assignment for my course.
+		@PutMapping("/gradebook/edit-name/{id}")
+		@Transactional
+		public void editAssignmentName(@RequestBody AssignmentListDTO.AssignmentDTO assignments, @PathVariable("id") Integer assignmentId ) {
+			
+			String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+			checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
+			
+			Assignment a = assignmentRepository.findById(assignments.assignmentId);
+			a.setName(assignments.assignmentName);
+		}
+		
+	
+//	// As an instructor, I can change the name of the assignment for my course.
 //	@PostMapping("gradebook/change-name")
 //	@Transactional
 //	public AssignmentDTO editAssignmentName(@RequestBody AssignmentDTO assignmentDTO) {
 //		Assignment assignment = assignmentRepository.findById(assignmentDTO.assignmentId);
 //
-//        if (assignment != null) {
-//            assignment.setName(assignment);
-//            studentRepository.save(student);
+//	    if (assignment != null) {
+//	        assignment.setName(assignment.getName());
+//	        assignmentRepository.save(assignment);
 //
-//            return createAssignmentDTO(student);
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Assignment");
-//        }
+//	        return createAssignmentDTO(assignment);
+//	        } else {
+//	            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Assignment");
+//	        }
 //	}
+//		
+		
+	@RequestMapping(path="/gradebook/{assignmentId}", method = RequestMethod.DELETE)
+	@Transactional
+	public void dropAssignment( @PathVariable int assignmentId) {
+			
+		String email = "dwisneski@csumb.edu";
+		Assignment a = checkAssignment(assignmentId, email);
+			
+		Assignment assignment = assignmentRepository.findById(assignmentId);
+			
+		//verify there are no grades
+		if (assignment.getNeedsGrading() == 1) {
+			assignmentRepository.delete(assignment);
+		} else {
+			throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "Can't Delete - Assignment has grades");
+		}
+	}
+		
+		
+	private AssignmentDTO createAssignmentDTO(Assignment a) {
+	     AssignmentDTO assignmentDTO = new AssignmentDTO(a.getId(), assignmentRepository.findById(a.getId()).getId(), a.getName(),
+	        	a.getName(), a.getDueDate().toString());
+
+	     return assignmentDTO;
+	}
 	
 	private Assignment checkAssignment(int assignmentId, String email) {
 		// get assignment 
