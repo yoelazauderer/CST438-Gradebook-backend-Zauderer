@@ -1,6 +1,6 @@
 package com.cst438.controllers;
 
-import java.sql.Date;
+import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -170,7 +170,7 @@ public class GradeBookController {
 			Assignment assignment = new Assignment();
 			assignment.setName(assignmentDTO.assignmentName);
 				
-			SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
 			Date dueDate = null;
 			try {
 				dueDate = (Date) formatter.parse(assignmentDTO.dueDate);
@@ -178,7 +178,8 @@ public class GradeBookController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	
-			assignment.setDueDate(dueDate);
+			
+			assignment.setDueDate(new java.sql.Date(dueDate.getTime()));
 				
 			Course course = courseRepository.findByCourse_id(assignmentDTO.courseId);
 			assignment.setCourse(course);
@@ -197,32 +198,15 @@ public class GradeBookController {
 	//As an instructor, I can change the name of the assignment for my course.
 		@PutMapping("/gradebook/edit-name/{id}")
 		@Transactional
-		public void editAssignmentName(@RequestBody AssignmentListDTO.AssignmentDTO assignments, @PathVariable("id") Integer assignmentId ) {
+		public void editAssignmentName(@RequestBody AssignmentListDTO.AssignmentDTO assignments, @PathVariable("id") int assignmentId ) {
 			
 			String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
 			checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
 			
-			Assignment a = assignmentRepository.findById(assignments.assignmentId);
+			Assignment a = assignmentRepository.findById(assignmentId);
 			a.setName(assignments.assignmentName);
+			assignmentRepository.save(a);
 		}
-		
-	
-//	// As an instructor, I can change the name of the assignment for my course.
-//	@PostMapping("gradebook/change-name")
-//	@Transactional
-//	public AssignmentDTO editAssignmentName(@RequestBody AssignmentDTO assignmentDTO) {
-//		Assignment assignment = assignmentRepository.findById(assignmentDTO.assignmentId);
-//
-//	    if (assignment != null) {
-//	        assignment.setName(assignment.getName());
-//	        assignmentRepository.save(assignment);
-//
-//	        return createAssignmentDTO(assignment);
-//	        } else {
-//	            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Assignment");
-//	        }
-//	}
-//		
 		
 	@RequestMapping(path="/gradebook/{assignmentId}", method = RequestMethod.DELETE)
 	@Transactional
@@ -243,8 +227,8 @@ public class GradeBookController {
 		
 		
 	private AssignmentDTO createAssignmentDTO(Assignment a) {
-	     AssignmentDTO assignmentDTO = new AssignmentDTO(a.getId(), assignmentRepository.findById(a.getId()).getId(), a.getName(),
-	        	a.getName(), a.getDueDate().toString());
+	     AssignmentDTO assignmentDTO = new AssignmentDTO(a.getId(), a.getCourse().getCourse_id(), a.getName(),
+	        a.getDueDate().toString(), a.getCourse().getTitle());
 
 	     return assignmentDTO;
 	}
