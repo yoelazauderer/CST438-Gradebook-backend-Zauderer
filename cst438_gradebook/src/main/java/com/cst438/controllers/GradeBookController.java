@@ -171,20 +171,25 @@ public class GradeBookController {
 			assignment.setName(assignmentDTO.assignmentName);
 				
 			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-			Date dueDate = null;
+			Date dueDate1 = new Date();
 			try {
-				dueDate = (Date) formatter.parse(assignmentDTO.dueDate);
+				//dueDate1 = (Date) formatter.parse(assignmentDTO.dueDate);		
+				dueDate1 = formatter.parse(assignmentDTO.dueDate);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}	
 			
-			assignment.setDueDate(new java.sql.Date(dueDate.getTime()));
-				
+			assignment.setDueDate(new java.sql.Date(dueDate1.getTime()));
+			
+			//int courseIdInt;	
+			//courseIdInt = Integer.valueOf(assignmentDTO.courseId);
+			
 			Course course = courseRepository.findByCourse_id(assignmentDTO.courseId);
 			assignment.setCourse(course);
 				
-			//assignment.setNeedsGrading(1);
+			assignment.setNeedsGrading(1);
 			Assignment newAssignment = assignmentRepository.save(assignment);
 				
 			return createAssignmentDTO(newAssignment);

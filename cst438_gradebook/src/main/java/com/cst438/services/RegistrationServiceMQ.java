@@ -1,6 +1,8 @@
 package com.cst438.services;
 
 
+import java.util.List;
+
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,6 +47,17 @@ public class RegistrationServiceMQ extends RegistrationService {
 	public void receive(EnrollmentDTO enrollmentDTO) {
 		
 		//TODO  complete this method in homework 4
+Enrollment enrollment = new Enrollment();
+		
+		enrollment.setStudentName(enrollmentDTO.studentName);
+		enrollment.setStudentEmail(enrollmentDTO.studentEmail);
+		Course course = courseRepository.findByCourse_id(enrollmentDTO.course_id);
+		enrollment.setCourse(course);
+		
+		//Enrollment newEnrollment = 
+		enrollmentRepository.save(enrollment);
+		
+		System.out.println(" Enrollment Saved: '" + enrollmentDTO + "'"); 
 		
 	}
 
@@ -53,6 +66,9 @@ public class RegistrationServiceMQ extends RegistrationService {
 	public void sendFinalGrades(int course_id, CourseDTOG courseDTO) {
 		 
 		//TODO  complete this method in homework 4
+		//List grades = courseDTO.grades;
+		this.rabbitTemplate.convertAndSend(courseDTO);
+		System.out.println(" Final Grades Sent '" + courseDTO + "'");
 		
 	}
 
