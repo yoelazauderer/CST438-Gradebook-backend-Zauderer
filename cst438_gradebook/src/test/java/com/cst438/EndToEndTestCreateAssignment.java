@@ -28,9 +28,9 @@ import com.cst438.domain.EnrollmentRepository;
 @SpringBootTest
 public class EndToEndTestCreateAssignment {
 
-	public static final String CHROME_DRIVER_FILE_LOCATION = "/Users/yoelazauderer/downloads/chromedriver.exe";
+	public static final String CHROME_DRIVER_FILE_LOCATION = "/Users/yoelazauderer/downloads/chromedriver";
 
-	public static final String URL = "http://localhost:3000";
+	public static final String URL = "https://cst438grade-fe.herokuapp.com/";
 
 	public static final int TEST_COURSE_ID = 40443;
 	
