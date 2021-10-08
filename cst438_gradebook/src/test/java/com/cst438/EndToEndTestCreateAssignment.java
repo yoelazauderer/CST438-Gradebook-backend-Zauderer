@@ -92,9 +92,8 @@ public class EndToEndTestCreateAssignment {
 			driver.findElement(By.xpath("//button[span='Add']")).click();
 			Thread.sleep(SLEEP_DURATION);
 			
-			//verify that new assignment shows in assignment list
-			//Assignment assignment = assignmentRepository.findByCourseIdAndName(TEST_COURSE_ID, TEST_ASSIGNMENT_NAME).get();
-			WebElement we = driver.findElement(By.xpath("//div[@data-field='name' and @data-value='" + TEST_ASSIGNMENT_NAME + "']"));
+			//verify that new assignment shows in assignment list			
+			WebElement we = driver.findElement(By.xpath("(//div[@role='row'])[last()]"));
 			assertNotNull(we, "Added assignment does not show in assignment list.");
 			
 			//verify that assignment row has been inserted to database
