@@ -42,6 +42,13 @@
     		<optional>true</optional>
 		</dependency>
 		
+		<!--  for Oauth2 -->
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+		<!--  END for Oauth2 -->
+		
 		<!-- for rabbitmq -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
